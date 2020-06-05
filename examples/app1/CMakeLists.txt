@@ -1,126 +1,41 @@
-#cmake_minimum_required(VERSION 2.8)
+add_executable(app1 app1.cc)
+#set_target_properties(coupler PROPERTIES PUBLIC_HEADER "${HEADERS}")
+target_link_libraries(app1 adios2::adios2) # PkgConfig::fftw)
 
-set(SRCS  
-	app1.cc
-	#cpl_scorec.cc
-	)
-# any headers which need to be public/installed
-#  this does not need to be ALL headers
-set(HDRS )
-set(EXEC app1)
+add_executable(app2 app2.cc)
+#set_target_properties(coupler PROPERTIES PUBLIC_HEADER "${HEADERS}")
+target_link_libraries(app2 adios2::adios2) # PkgConfig::fftw)
 
-set(USER_LIB "/users/adesoa/dev")
-set(ADIOS2_USER_DIR "/project/projectdirs/m499/Software/adios2/DEFAULT/cori_haswell/DEFAULT")
+add_executable(app3 app3.cc)
+#set_target_properties(coupler PROPERTIES PUBLIC_HEADER "${HEADERS}")
+target_link_libraries(app3 adios2::adios2)
 
-#For cori build
-set(ADIOS2_INCLUDE_DIRS "${ADIOS2_USER_DIR}/include")
-set(ADIOS2_LIB_DIR "${ADIOS2_USER_DIR}/lib64")
+add_executable(inlinewriread inlinewriread.cc)
+#set_target_properties(coupler PROPERTIES PUBLIC_HEADER "${HEADERS}")
+target_link_libraries(inlinewriread adios2::adios2)
+
+add_executable(helloBPWriter helloBPWriter.cc)
+target_link_libraries(helloBPWriter adios2::adios2)
+
+add_executable(helloBPReader helloBPReader.cc)
+target_link_libraries(helloBPReader adios2::adios2)
+
+add_executable(helloBPReader_nompi helloBPReader_nompi.cc)
+target_link_libraries(helloBPReader_nompi adios2::adios2)
+
+#add_executable(helloInsituArgs  helloInsituArgs.F90)
+#target_link_libraries(helloInsituArgs adios2::adios2)
+
+add_executable(write_f write_f.F90)
+target_link_libraries(write_f adios2::adios2_f  MPI::MPI_Fortran MPI::MPI_C SRC)
+
+add_executable(reader_f reader_f.F90)
+target_link_libraries(reader_f adios2::adios2_f  MPI::MPI_Fortran MPI::MPI_C SRC)
+
+#add_executable(reader reader.cc)
+#target_link_libraries(reader adios2::adios2)
 
 
-#For scorec build
-#set(ADIOS2_INCLUDE_DIRS "${USER_LIB}/install/ADIOS2/include")
-#set(ADIOS2_LIB_DIR "${USER_LIB}/install/ADIOS2/lib64")
 
-set(CPL_INC "/lore/adesoa/dev/wdmapp_coupling/drv/build")
-set(DRV_INC "${CPL_INC}/src")
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${ADIOS2_LIB_DIR} ${CPL_INC} )
-
-
-find_package(MPI REQUIRED)
-include_directories( ${MPI_CXX_INCLUDE_PATH} )
-
-#find_library(DRV_LIB NAMES wdm_minapp)
-#include_directories(${DRV_INC})
-#if(NOT DRV_LIB)
-#  message(STATUS "coupling driver library not found")
-#else()
-#  message(STATUS "coupling driver library was found")
-#endif()
-
-find_library(ADIOS2_F NAMES adios2_f)
-include_directories(${ADIOS2_INCLUDE_DIRS})
-if(NOT ADIOS2_F)
-  message(STATUS "adios2_f library not found")
-else()
-  message(STATUS "adios2_f library was found")
-endif()
-
-find_library(ADIOS2_LIB NAMES adios2)
-if(NOT ADIOS2_LIB)
-  message(STATUS "adios2 library not found")
-else()
-  message(STATUS "adios2 library was found")
-endif()
-
-find_library(ADIOS2_SST NAMES adios2_sst)
-if(NOT ADIOS2_SST)
-	message(STATUS "adios2_sst library not found")
-else()
-  message(STATUS "adios2_sst library was found")
-endif()
-
-find_library(ADIOS2_TAUS NAMES taustubs)
-if(NOT ADIOS2_TAUS)
-  message(STATUS "taustubs library not found")
-else()
-  message(STATUS "taustubs library was found")
-endif()
-
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-add_definitions(-DADIOS2_HAVE_MPI)
-add_executable(${LIB_NAME} app1_2d.cc)
-target_link_libraries( ${LIB_NAME}  ${MPI_CXX_LIBRARIES} ${ADIOS2_LIB})
-=======
-=======
->>>>>>> Stashed changes
-find_library(ADIOS2_EV NAMES adios2_evpath)
-if(NOT ADIOS2_EV)
-	message(STATUS "adios2_evpath library not found")
-else()
-  message(STATUS "adios2_evpath library was found")
-endif()
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-
-find_library(ADIOS2_FFS NAMES adios2_ffs)
-if(NOT ADIOS2_FFS)
-  message(STATUS "adios2_ffs library not found")
-else()
-  message(STATUS "adios2_ffs library was found")
-endif()
-
-find_library(ADIOS2_ATL NAMES adios2_atl)
-if(NOT ADIOS2_ATL)
-  message(STATUS "adios2_atl library not found")
-else()
-  message(STATUS "adios2_atl library was found")
-endif()
-
-find_library(ADIOS2_DILL NAMES adios2_dill)
-if(NOT ADIOS2_DILL)
-  message(STATUS "adios2_dill library not found")
-else()
-  message(STATUS "adios2_dill library was found")
-endif()
-
-find_library(ADIOS2_ENET NAMES adios2_enet)
-if(NOT ADIOS2_ENET)
-  message(STATUS "adios2_enet library not found")
-else()
-  message(STATUS "adios2_enet library was found")
-endif()
-
-set(LINK_LIBS ${LINK_LIBS} ${MPI_LIBRARIES} ${ADIOS2_F} ${ADIOS2_LIB} ${ADIOS2_SST} ${ADIOS2_TAUS} ${ADIOS2_EV} ${ADIOS2_FFS} ${ADIOS2_ATL} ${ADIOS2_DILL} ${ADIOS2_ENET}) # ${DRV_LIB})
-set(INCLUDE_DIRS ${INCLUDE_DIRS} ${MPI_INCLUDE_PATH} ${ADIOS_INCLUDE_DIRS} ${ADIOS2_INCLUDE_DIRS}) #${DRV_INC})
-
-add_executable(${EXEC} ${SRCS} )
-target_link_libraries(${EXEC} ${LINK_LIBS})
-
-INSTALL(TARGETS ${EXEC}
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION ${PROJECT_BINARY_DIR}
-        ARCHIVE DESTINATION ${PROJECT_BINARY_DIR})
-install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
+#target_include_directories(adios PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+#install(TARGETS adios)
