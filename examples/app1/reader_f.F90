@@ -1,5 +1,4 @@
 program helloInsituMPIReader
-    use helloInsituArgs
     use mpi
     use adios2
 
@@ -11,64 +10,110 @@ program helloInsituMPIReader
     type(adios2_engine):: engine
 
     integer :: wrank, wsize, rank, nproc
-    real, dimension(:,:), allocatable :: myArray
+    integer, dimension(:,:), allocatable :: myArray
     integer :: ndims
-    integer(kind=8), dimension(:), allocatable :: shape_dims
-    integer(kind=8), dimension(:), allocatable :: sel_start, sel_count
+ !   integer(kind=4), dimension(:), allocatable :: shape_dims
+ !   integer(kind=4), dimension(:), allocatable :: sel_start, sel_count
+    integer(kind=8) :: shape_dims(0:1),start_dims(0:1),count_dims(0:1)
     integer :: ierr
     integer :: i, j, step
-    integer :: comm, color
 
+    character(len=256) :: filename = "/users/szhang/adios2example/examples/"
+    character(len=256) :: bpfile, xmlfile
+
+    integer :: npx,npy,posx,posy,offx,offy
+    integer :: ndx,ndy,gdx,gdy
+
+    integer :: rorder=0
+    integer :: dimen(0:1)
+    integer :: subcomm(0:1),comm, comm_x,comm_y
+    integer :: mype_x,mype_y
+    logical   :: remain(0:1),periods(0:1)
+
+    integer :: steps=2
+
+    xmlfile = trim(filename)//"xmlfile.xml"
+    bpfile = "writer.bp"
 
     ! Launch MPI
     call MPI_Init(ierr)
     call MPI_Comm_rank(MPI_COMM_WORLD, wrank, ierr)
     call MPI_Comm_size(MPI_COMM_WORLD, wsize, ierr)
 
-    ! Split MPI world into writers and readers. This code is the writers.
-    color = 2
-    call MPI_Comm_split(MPI_COMM_WORLD, color, wrank, comm, ierr)
-    call MPI_Comm_rank(comm, rank, ierr)
-    call MPI_Comm_size(comm, nproc, ierr)
+    npx=wsize
+    npy=1
 
-!    call ProcessArgs(rank, nproc, .false.)
+    gdx=8
+    ndx=gdx/npx
+    gdy=2
+    ndy=gdy
+
+    dimen = (/npx,npy/)
+    periods = .true.
+    call MPI_Cart_create(MPI_COMM_WORLD,2,dimen,periods,rorder,comm,ierr)
+    do i=1,2
+      remain = .false.
+      remain(i-1) = .true.
+      call  MPI_Cart_sub(comm,remain,subcomm(i-1),ierr)
+    end do
+    comm_x=subcomm(0)
+    comm_y=subcomm(1)
+
+    call MPI_Comm_rank(subcomm(0),mype_x,ierr)
+
+    call MPI_Comm_rank(subcomm(1),mype_y,ierr)
+
+    offx = mype_x * ndx
+    offy = mype_y * ndy
+
+    allocate( myArray(0:ndx-1,0:ndy-1) )
+
+    shape_dims = (/ int(npx*ndx,8), int(npy*ndy,8) /)
+    start_dims = (/ int(offx,8), int(offy,8) /)
+    count_dims = (/ int(ndx,8), int(ndy,8) /)
+
+!    shape_dims = (/ npx*ndx, npy*ndy /)
+!    start_dims = (/ offx, offy /)
+!    count_dims = (/ ndx, ndy /)
+
+
 
     ! Start adios2
-    call adios2_init( adios, xmlfile, comm, adios2_debug_mode_on, ierr )
+    call adios2_init( adios, xmlfile, comm_y, adios2_debug_mode_on, ierr )
 
     ! Declare an IO process configuration inside adios,
     ! Engine choice and parameters for 'writer' come from the config file
     call adios2_declare_io( io, adios, 'reader', ierr )
 
-    call adios2_open( engine, io, streamname, adios2_mode_read, ierr)
+    call adios2_open( engine, io, bpfile , adios2_step_mode_read, ierr)
 
     if( ierr == adios2_found ) then
-        step = 0
-        do
+        
+        do j=1,2
             call adios2_begin_step(engine, ierr)
             if (ierr /= adios2_step_status_ok) then
                 exit
             endif
 
-            call adios2_inquire_variable( varArray, io, 'myArray', ierr )
+            call adios2_inquire_variable( varArray, io, 'writer', ierr )
 
-            if (step == 0) then
-                call adios2_variable_shape( shape_dims, ndims, varArray, ierr)
-                ! ndims is assumed to be 2 here
-                call DecomposeArray( shape_dims(1), shape_dims(2), rank, nproc)
-                allocate (sel_start(2), sel_count(2))
-                sel_start = (/ offx, offy /)
-                sel_count = (/ ndx, ndy /)
-                allocate( myArray( sel_count(1), sel_count(2)) )
-            endif
+            call adios2_set_selection( varArray, 2,start_dims,count_dims, ierr )
+            call adios2_get( engine, varArray, myArray, adios2_mode_deferred,ierr )
 
-            call adios2_set_selection( varArray, 2, sel_start, sel_count, ierr )
-            call adios2_get( engine, varArray, myArray, ierr )
             call adios2_end_step(engine, ierr)
 
-            call print_array(myArray, sel_start, rank, step)
+   if(mype_y==0) then
+     do i=0,ndy-1
+       print*,"j=",j,"mype_x=",mype_x,"i=",i, "myArray",myArray(:,i)
+     enddo 
+   endif
 
-            step = step + 1
+        !    call print_array(myArray, sel_start, rank, step)
+
+!            step = step + 1
+!            if(step>3) then
+!              stop
+!            end if
         end do
 
 

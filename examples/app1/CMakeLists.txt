@@ -10,9 +10,8 @@ add_executable(app3 app3.cc)
 #set_target_properties(coupler PROPERTIES PUBLIC_HEADER "${HEADERS}")
 target_link_libraries(app3 adios2::adios2)
 
-add_executable(inlinewriread inlinewriread.cc)
-#set_target_properties(coupler PROPERTIES PUBLIC_HEADER "${HEADERS}")
-target_link_libraries(inlinewriread adios2::adios2)
+#add_executable(inlinewriread inlinewriread.cc)
+#target_link_libraries(inlinewriread adios2::adios2)
 
 add_executable(helloBPWriter helloBPWriter.cc)
 target_link_libraries(helloBPWriter adios2::adios2)
