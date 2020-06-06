@@ -6,20 +6,20 @@ program helloInsituMPIWriter
 
     integer(kind=8) ::  shape_dims(0:1), start_dims(0:1), count_dims(0:1)
     integer, dimension(:,:), allocatable :: myArray
-    integer :: wrank, wsize, rank, nproc
+    integer :: wrank, wsize, nproc
     integer :: ierr, i, j, step
     type(adios2_adios):: adios
     type(adios2_io):: io
     type(adios2_variable):: varArray
     type(adios2_engine):: engine
-    character(len=256) :: filename = "/users/szhang/adios2example/examples/"
+    character(len=256) :: filename ="/gpfs/u/home/MPFS/MPFSshng/scratch/adios2example/examples/"
     character(len=256) :: bpfile, xmlfile
 
     integer :: npx,npy,posx,posy,offx,offy 
     integer :: ndx,ndy,gdx,gdy
 
-    integer :: rorder=0  
-    integer :: dimen(0:1)
+    logical :: rorder= .false.  
+    integer :: dimen(2)
     integer :: subcomm(0:1),comm, comm_x,comm_y
     integer :: mype_x,mype_y
     logical   :: remain(0:1),periods(0:1)  
@@ -62,7 +62,7 @@ program helloInsituMPIWriter
 
     ! Application variables
     allocate( myArray(0:ndx-1,0:ndy-1) )
-    myArray = rank*ndx*ndy
+    myArray = wrank*ndx*ndy
     do j=1,ndy
         do i=1,ndx
             myArray(i-1,j-1) = myArray(i-1,j-1) + (j-1)*gdx + i-1
@@ -80,8 +80,6 @@ program helloInsituMPIWriter
     start_dims = (/ int(offx,8), int(offy,8) /)
     count_dims = (/ int(ndx,8), int(ndy,8) /)
 
-print*, shape_dims,start_dims,count_dims
-
 !    shape_dims = (/ npx*ndx, npy*ndy /)
 !    start_dims = (/ offx, offy /)
 !    count_dims = (/ ndx, ndy /)
@@ -89,7 +87,7 @@ print*, shape_dims,start_dims,count_dims
 
 
     ! Create adios handler passing the communicator, config file, debug mode and error flag
-     call adios2_init(adios, xmlfile, comm_y, adios2_debug_mode_on, ierr)
+     call adios2_init(adios, xmlfile, comm_x, adios2_debug_mode_on, ierr)
 
     ! Declare an IO process configuration inside adios, 
     ! Engine choice and parameters for 'writer' come from the config file
@@ -102,7 +100,7 @@ print*, shape_dims,start_dims,count_dims
     ! Open myVector_f.bp in write mode, this launches an engine
     call adios2_open(engine, io,bpfile, adios2_mode_write, ierr)
 
-    do step = 1, steps
+    do step = 1, 1
    print*, "step=", step
         call adios2_begin_step(engine, ierr)
         call adios2_put(engine, varArray, myArray, ierr)

@@ -9,7 +9,7 @@ program helloInsituMPIReader
     type(adios2_variable):: varArray
     type(adios2_engine):: engine
 
-    integer :: wrank, wsize, rank, nproc
+    integer :: wrank, wsize, nproc
     integer, dimension(:,:), allocatable :: myArray
     integer :: ndims
  !   integer(kind=4), dimension(:), allocatable :: shape_dims
@@ -18,14 +18,14 @@ program helloInsituMPIReader
     integer :: ierr
     integer :: i, j, step
 
-    character(len=256) :: filename = "/users/szhang/adios2example/examples/"
+    character(len=256) :: filename = "/gpfs/u/home/MPFS/MPFSshng/scratch/adios2example/examples/"
     character(len=256) :: bpfile, xmlfile
 
     integer :: npx,npy,posx,posy,offx,offy
     integer :: ndx,ndy,gdx,gdy
 
-    integer :: rorder=0
-    integer :: dimen(0:1)
+    logical :: rorder = .false.
+    integer :: dimen(2)
     integer :: subcomm(0:1),comm, comm_x,comm_y
     integer :: mype_x,mype_y
     logical   :: remain(0:1),periods(0:1)
@@ -49,7 +49,7 @@ program helloInsituMPIReader
     ndy=gdy
 
     dimen = (/npx,npy/)
-    periods = .true.
+    periods = (/.true.,.true./)
     call MPI_Cart_create(MPI_COMM_WORLD,2,dimen,periods,rorder,comm,ierr)
     do i=1,2
       remain = .false.
@@ -79,17 +79,17 @@ program helloInsituMPIReader
 
 
     ! Start adios2
-    call adios2_init( adios, xmlfile, comm_y, adios2_debug_mode_on, ierr )
+    call adios2_init( adios, xmlfile, comm_x, adios2_debug_mode_on, ierr )
 
     ! Declare an IO process configuration inside adios,
     ! Engine choice and parameters for 'writer' come from the config file
     call adios2_declare_io( io, adios, 'reader', ierr )
 
-    call adios2_open( engine, io, bpfile , adios2_step_mode_read, ierr)
+    call adios2_open( engine, io, bpfile , adios2_mode_read, ierr)
 
     if( ierr == adios2_found ) then
         
-        do j=1,2
+        do j=1,1
             call adios2_begin_step(engine, ierr)
             if (ierr /= adios2_step_status_ok) then
                 exit
@@ -98,7 +98,7 @@ program helloInsituMPIReader
             call adios2_inquire_variable( varArray, io, 'writer', ierr )
 
             call adios2_set_selection( varArray, 2,start_dims,count_dims, ierr )
-            call adios2_get( engine, varArray, myArray, adios2_mode_deferred,ierr )
+            call adios2_get( engine, varArray, myArray,ierr )
 
             call adios2_end_step(engine, ierr)
 
