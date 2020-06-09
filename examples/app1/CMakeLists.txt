@@ -28,11 +28,20 @@ target_link_libraries(helloBPReader_nompi adios2::adios2)
 add_executable(write_f write_f.F90)
 target_link_libraries(write_f adios2::adios2_f  MPI::MPI_Fortran MPI::MPI_C SRC)
 
+add_executable(write1d_f write1d_f.F90)
+target_link_libraries(write1d_f adios2::adios2_f  MPI::MPI_Fortran MPI::MPI_C SRC)
+
 add_executable(reader_f reader_f.F90)
 target_link_libraries(reader_f adios2::adios2_f  MPI::MPI_Fortran MPI::MPI_C SRC)
 
 add_executable(reader1d_f reader1d_f.F90)
 target_link_libraries(reader1d_f adios2::adios2_f  MPI::MPI_Fortran MPI::MPI_C SRC)
+
+add_executable(writeMPIassem_f writeMPIassem_f.F90)
+target_link_libraries(writeMPIassem_f adios2::adios2_f  MPI::MPI_Fortran MPI::MPI_C SRC)
+
+add_executable(readMPIassem_f readMPIassem_f.F90)
+target_link_libraries(readMPIassem_f adios2::adios2_f  MPI::MPI_Fortran MPI::MPI_C SRC)
 
 
 

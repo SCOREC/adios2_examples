@@ -1,4 +1,4 @@
-program helloInsituMPIReader
+program reader1d_f 
     use mpi
     use adios2
 
@@ -40,8 +40,8 @@ program helloInsituMPIReader
     call MPI_Comm_rank(MPI_COMM_WORLD, wrank, ierr)
     call MPI_Comm_size(MPI_COMM_WORLD, wsize, ierr)
 
-    npx=wsize
-    npy=1
+    npx=wsize/2
+    npy=2
 
     gdx=8
     ndx=gdx/npx
@@ -64,13 +64,13 @@ program helloInsituMPIReader
     call MPI_Comm_rank(subcomm(1),mype_y,ierr)
 
     offx = mype_x * ndx
-    offy =  0
+    offy = 0
 
-    allocate( myArray(0:ndx-1,0:1) )
+    allocate(myArray(0:ndx-1,0:1)) 
 
     shape_dims = (/ int(npx*ndx,8), int(npy*ndy,8) /)
     start_dims = (/ int(offx,8), int(offy,8) /)
-    count_dims = (/ int(ndx,8), int(ndy,8) /)
+    count_dims = (/ int(ndx,8), int(2,8) /)
 
 !    shape_dims = (/ npx*ndx, npy*ndy /)
 !    start_dims = (/ offx, offy /)
@@ -79,7 +79,7 @@ program helloInsituMPIReader
 
 
     ! Start adios2
-    call adios2_init( adios, xmlfile, comm_x, adios2_debug_mode_on, ierr )
+    call adios2_init( adios, xmlfile, MPI_COMM_WORLD, adios2_debug_mode_on, ierr )
 
     ! Declare an IO process configuration inside adios,
     ! Engine choice and parameters for 'writer' come from the config file
@@ -102,12 +102,9 @@ program helloInsituMPIReader
 
             call adios2_end_step(engine, ierr)
 
-   if(mype_y==0) then
-     do i=0,ndy-1
-       print*,"j=",j,"mype_x=",mype_x,"i=",i, "myArray",myArray(:,i)
-     enddo 
-   endif
-
+ do i=0,1
+     print*,"i=",i,"mype_x=",mype_x,"myArray",myArray(:,i)
+enddo
         !    call print_array(myArray, sel_start, rank, step)
 
 !            step = step + 1
@@ -161,4 +158,4 @@ subroutine print_array(xy,offset,rank, step)
 
 end subroutine print_array
 
-end program helloInsituMPIReader
+end program 
