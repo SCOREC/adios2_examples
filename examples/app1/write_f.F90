@@ -65,7 +65,7 @@ program helloInsituMPIWriter
     myArray = wrank*ndx*ndy
     do j=1,ndy
         do i=1,ndx
-            myArray(i-1,j-1) = myArray(i-1,j-1) + (j-1)*gdx + i-1
+            myArray(i-1,j-1) = myArray(i-1,j-1) + (j-1)*gdx + i-1+j
         end do
     end do
 
@@ -84,7 +84,7 @@ program helloInsituMPIWriter
 !    start_dims = (/ offx, offy /)
 !    count_dims = (/ ndx, ndy /)
 
-
+print*, "npx*ndx=", npx*ndx, "npy*ndy=",npy*ndy
 
     ! Create adios handler passing the communicator, config file, debug mode and error flag
      call adios2_init(adios, xmlfile, comm_x, adios2_debug_mode_on, ierr)

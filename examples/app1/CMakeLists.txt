@@ -19,8 +19,15 @@ target_link_libraries(helloBPWriter adios2::adios2)
 add_executable(helloBPReader helloBPReader.cc)
 target_link_libraries(helloBPReader adios2::adios2)
 
+#add_executable(helloBPReader2d helloBPReader2d.cc)
+#target_link_libraries(helloBPReader2d adios2::adios2)
+
 add_executable(helloBPReader_nompi helloBPReader_nompi.cc)
 target_link_libraries(helloBPReader_nompi adios2::adios2)
+
+
+add_executable(reader1d reader1d.cc)
+target_link_libraries(reader1d adios2::adios2)
 
 #add_executable(helloInsituArgs  helloInsituArgs.F90)
 #target_link_libraries(helloInsituArgs adios2::adios2)
